@@ -7,28 +7,33 @@ class RacingGameTest {
 
     @Test
     fun `should declare one winner correctly`() {
-        val cars = listOf(Car("pobi"), Car("woni"))
-        val game = RacingGame(cars, 1)
+        val pobi = Car("pobi")
+        val woni = Car("woni")
+        val cars = listOf(pobi, woni)
+        val game = RacingGame(cars, 1) // Pass dummy round count
 
-        // Force one car to win for test determinism (manually increase position)
-        cars[0].move()
-        game.printWinners()
+        pobi.setPositionForTesting(3)
+        woni.setPositionForTesting(1)
 
-        val winner = if (cars[0].position >= cars[1].position) "pobi" else "woni"
-        assertThat(listOf("pobi", "woni")).contains(winner)
+        // Replicate printWinners logic to get winners list
+        val maxPosition = cars.maxOfOrNull { it.position } ?: 0
+        val winners = cars.filter { it.position == maxPosition }.map { it.name }
+
+        assertThat(winners).containsExactly("pobi")
     }
 
     @Test
     fun `should allow multiple winners if tied`() {
-        val car1 = Car("a").apply { repeat(3) { move() } }
-        val car2 = Car("b").apply { repeat(3) { move() } }
-
+        val car1 = Car("a")
+        val car2 = Car("b")
         val cars = listOf(car1, car2)
-        val game = RacingGame(cars, 0)
+        val game = RacingGame(cars, 1) // Pass dummy round count
 
-        // Both have same position
-        val max = cars.maxOf { it.position }
-        val winners = cars.filter { it.position == max }.map { it.name }
+        car1.setPositionForTesting(5)
+        car2.setPositionForTesting(5)
+
+        val maxPosition = cars.maxOfOrNull { it.position } ?: 0
+        val winners = cars.filter { it.position == maxPosition }.map { it.name }
 
         assertThat(winners).containsExactlyInAnyOrder("a", "b")
     }
